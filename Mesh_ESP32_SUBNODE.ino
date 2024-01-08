@@ -2,20 +2,20 @@
 #include <Arduino_JSON.h>
 
 // MESH Details
-#define MESH_PREFIX "FireMesh"   // name for your MESH
-#define MESH_PASSWORD "Ilovedad100" // password for your MESH
+#define MESH_PREFIX "FireMesh"   // name for my MESH
+#define MESH_PASSWORD "Ilovedad100" // password for my MESH
 #define MESH_PORT 5555           // default port
 
 // Analog pin where MQ-135 sensor is connected
 const int mq135Pin = 35;
-
+const int bmePin = 32;
 // Number for this node
-int nodeNumber = 10;
+int nodeNumber = 5;
 
 // String to send to other nodes with sensor readings
 String readings;
 
-Scheduler userScheduler; // to control your personal task
+Scheduler userScheduler; // to control my personal task
 painlessMesh mesh;
 
 // User stub
@@ -30,8 +30,10 @@ String getReadings() {
   jsonReadings["node"] = nodeNumber;
   
   // Read analog value from MQ-135 sensor
+  int FlameValue = analogRead(34);
+  jsonReadings["value"] = FlameValue;
   int mq135Value = analogRead(mq135Pin);
-  jsonReadings["value"] = mq135Value;  
+  jsonReadings["value1"] = mq135Value;  
 
   readings = JSON.stringify(jsonReadings);
   return readings;
@@ -48,7 +50,9 @@ void receivedCallback(uint32_t from, String &msg) {
   int node = myObject["node"];
   Serial.print("Node: ");
   Serial.println(node);
-  int mq135Value = myObject["value"];  // Change the key to "value" instead of "mq135"
+  int FlameValue_1 = myObject["value"];
+  Serial.println(FlameValue_1);
+  int mq135Value = myObject["value1"];  
   Serial.println(mq135Value);
 }
 
@@ -73,7 +77,7 @@ void setup() {
   mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
   mesh.onReceive(&receivedCallback);
   mesh.onNewConnection(&newConnectionCallback);
-  mesh.onChangedConnections(&changedCallback);
+  mesh.onChangedConnections(&changedConnectionCallback);
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
   userScheduler.addTask(taskSendMessage);
   taskSendMessage.enable();
