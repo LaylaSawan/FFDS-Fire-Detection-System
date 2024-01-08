@@ -12,9 +12,11 @@ int nodeNumber = 2;
 Scheduler userScheduler;  // to control your personal task
 painlessMesh mesh;
 
-// General stuff
-int mq135Pin = 35;
+int flamePin = 34;
 int sensorValue = 0;
+// General stuff
+int gasPin = 35;
+int sensorValue1 = 0;
 
 // User stub
 void sendMessage();  // Prototype so PlatformIO doesn't complain
@@ -23,12 +25,14 @@ void sendMessage();  // Prototype so PlatformIO doesn't complain
 Task taskSendMessage(TASK_SECOND * 5, TASK_FOREVER, &sendMessage);
 
 void sendMessage() {
-  sensorValue = analogRead(mq135Pin);
+  sensorValue = analogRead(flamePin);
+  sensorValue1 = analogRead(gasPin);
 
   // Create a JSON document with the node number and MQ-135 value
-  DynamicJsonDocument jsonReadings(200);  // 200 is the capacity of the JSON document, adjust if needed
+  DynamicJsonDocument jsonReadings(200);  // 200 is the capacity of the JSON document
   jsonReadings["node"] = nodeNumber;
-  jsonReadings["mq135"] = sensorValue;
+  jsonReadings["flame"] = sensorValue;
+  jsonReadings["gas"] = sensorValue1;
 
   // Serialize the JSON document to a string
   String msg;
@@ -47,38 +51,41 @@ void receivedCallback(uint32_t from, String& msg) {
   deserializeJson(myObject, msg);
 
   int node = myObject["node"];
-  int mq135Value = myObject["mq135"];
-   //sensor stuff
-  float coConcentration = map(mq135Value, 0,  500, 0, 1000); 
-  float co2Concentration = map(mq135Value, 0, 1023, 0, 2000); 
+  int gasValue = myObject["gas"];
+  int flameValue = myObject["flame"];  // Fix: Added missing semicolon
 
-  String toSend = (String)node + "," + (String)coConcentration + "," + (String)co2Concentration +"\n" ;
+  //sensor stuff
+  float coConcentration = map(gasValue, 0,  500, 0, 1000); 
+  float co2Concentration = map(gasValue, 0, 1023, 0, 2000); 
+
+  String toSend = (String)node + "," + (String)coConcentration + "," + (String)co2Concentration + "," + (String)flameValue + "\n" ; //sending the message to the slave
 
   Serial2.write(toSend.c_str());
-  Serial.println(toSend);
+  Serial.println(toSend); //printing the values to the serial monitor
 
   // Print the received values
   Serial.print("Node: ");
   Serial.println(node);
-  Serial.print("MQ-135 Reading: ");
-  Serial.println(mq135Value);
+  Serial.print("Flame reading: ");
+  Serial.println(flameValue);
+  Serial.print("Gas reading: ");
+  Serial.println(gasValue);
 }
 
 void newConnectionCallback(uint32_t nodeId) {
-  Serial.printf("New Connection, nodeId = %u\n", nodeId);
+  Serial.printf("New Connection, nodeId = %u\n", nodeId); //saying that their is a new connection
 }
 
 void changedConnectionCallback() {
-  Serial.printf("Changed connections\n");
+  Serial.printf("Changed connections\n"); //their is a changed connection
 }
 
 void nodeTimeAdjustedCallback(int32_t offset) {
-  Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset);
+  Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset); //adjusted time
 }
 
 void setup() {
   Serial.begin(115200);
-
 
   // Mesh stuff
   mesh.setDebugMsgTypes(ERROR | STARTUP);
@@ -97,6 +104,6 @@ void setup() {
 }
 
 void loop() {
-  mesh.update();
+  mesh.update(); //updating the mesh network for the sensor values
   delay(1000);
 }
