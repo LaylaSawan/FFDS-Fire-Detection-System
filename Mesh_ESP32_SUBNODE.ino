@@ -31,9 +31,9 @@ String getReadings() {
   
   // Read analog value from MQ-135 sensor
   int FlameValue = analogRead(34);
-  jsonReadings["value"] = FlameValue;
+  jsonReadings["flame"] = FlameValue;
   int mq135Value = analogRead(mq135Pin);
-  jsonReadings["value1"] = mq135Value;  
+  jsonReadings["gas"] = mq135Value;  
 
   readings = JSON.stringify(jsonReadings);
   return readings;
@@ -50,9 +50,9 @@ void receivedCallback(uint32_t from, String &msg) {
   int node = myObject["node"];
   Serial.print("Node: ");
   Serial.println(node);
-  int FlameValue_1 = myObject["value"];
+  int FlameValue_1 = myObject["flame"];
   Serial.println(FlameValue_1);
-  int mq135Value = myObject["value1"];  
+  int mq135Value = myObject["gas"];  
   Serial.println(mq135Value);
 }
 
