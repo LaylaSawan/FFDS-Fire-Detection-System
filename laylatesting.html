@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Images from ESP32CAM</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    #image-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 20px; /* Adjust the gap between images */
+      padding: 20px; /* Add padding for better spacing */
+      box-sizing: border-box; /* Include padding in the element's total width */
+    }
+
+    .image-card {
+      width: 200px; /* Adjust the width of each card */
+      text-align: center;
+      border: 1px solid #ddd; /* Add a border for better visibility */
+      border-radius: 5px; /* Add border-radius for rounded corners */
+      overflow: hidden; /* Hide overflowing content */
+    }
+
+    img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-bottom: 1px solid #ddd; /* Add a border between image and text */
+    }
+
+    .fire-image {
+      width: 50%;
+      max-width: 50%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="color: green;">ForestMesh Nexus</h1>
+  <h1>Images from ESP32CAM</h1>
+  <div id="image-container"></div>
+
+  <script>
+    fetch('https://k1z4zgvk39.execute-api.us-east-2.amazonaws.com/DepA/test')
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Network response was not ok.');
+      })
+      .then(data => {
+        const container = document.getElementById("image-container");
+
+        data.forEach(item => {
+          const link = item["ImageLink"];
+          const time = item["created_at"];
+          const accuracy = item["accuracy"];
+          const fire = item["fire"];
+
+          const imageCard = document.createElement('div');
+          imageCard.className = 'image-card';
+
+          if (fire == 'There is a fire') {
+            const fireImage = document.createElement('img');
+            fireImage.src = 'https://static.vecteezy.com/system/resources/previews/019/907/703/original/fire-graphic-clipart-design-free-png.png';
+            fireImage.alt = 'Fire Image';
+            fireImage.classList.add('fire-image');
+            imageCard.appendChild(fireImage);
+          }   
+
+          const img = document.createElement('img');
+          const timeP = document.createElement('p');
+          const accuracyL = document.createElement('p');
+          const fireT = document.createElement('p');
+
+          img.src = "https://thegreengenie.ca/" + link;
+          timeP.textContent = "Time: " + time;
+          accuracyL.textContent = "Accuracy: " + accuracy;
+          fireT.textContent = "Fire: " + fire;
+
+          img.alt = "Image not available";
+
+          imageCard.appendChild(img);
+          imageCard.appendChild(timeP);
+          imageCard.appendChild(accuracyL);
+          imageCard.appendChild(fireT);
+
+          container.appendChild(imageCard);
+        });
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  </script> 
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Add a polygon to a map using a GeoJSON source</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%;}
+        .marker {
+            background-image: url('');
+            background-size: cover;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .mapboxgl-popup {
+            max-width: 200px;
+        }
+
+        .mapboxgl-popup-content {
+            text-align: center;
+            font-family: 'Open Sans', sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoibGF5bGFzYXdhbiIsImEiOiJjbHF2Z3I4azc1c2d1MnJtdW91OXZvOWF6In0.Bu50ecvGSNKMRhc0Ce6EDw';
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [-68.137343, 45.137451],
+        zoom: 5
+    });
+
+    const apiUrl = 'https://k1z4zgvk39.execute-api.us-east-2.amazonaws.com/DepA/';
+
+    let geojson = {
+        'type': 'FeatureCollection',
+        'features': []
+    };
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            data.forEach(point => {
+                data.forEach(item =>{
+                const node = point["node"];
+                const co = point["co"];
+                const co2 = point["co2"];
+                const flame = point["flame"];
+                const temp = point["temp"];
+                const humidity = point["humidity"];
+                const date_time = point["date_time"];
+
+                });
+
+                console.log(data)
+                console.log(point)
+                console.log(point.sensorData)
+                console.log(point.sensorData[0])
+                console.log(point.sensorData[0]["co2"])
+                
+                var color_red = '#880808';
+                var color_yellow = '#FFC300';
+                var color_green = '#50C878';
+
+                var currentColor;
+
+            if (point.sensorData[0]["co2"] >= 1000 && point.sensorData[0]["co2"] <= 2000) {
+                currentColor = color_green;
+            }else if (point.sensorData[0]["co2"] >= 3000 && point.sensorData[0]["co2"] <= 4000) {
+                currentColor = color_red;
+            } else {
+                currentColor = color_yellow;
+            }
+
+                new mapboxgl.Marker({ color: currentColor })
+                    .setLngLat([point.longitude, point.latitude])
+                    .setPopup(
+                        new mapboxgl.Popup({ offset: 25 })
+                            .setHTML(
+                                `<h3>Node: ${point.node}</h3><p> <u><b>CO: </b></u> ${point.sensorData[0]["co"]}, <br> <u><b>CO2: </b></u> ${point.sensorData[0]["co2"]}, <br> <u><b>Flame: </b></u> ${point.sensorData[0]["flame"]}, <br><u><b>Temperature: </b></u> ${point.sensorData[0]["temp"]}, <br> <u><b>Humidity: </b></u> ${point.sensorData[0]["humidity"]}, <br> <u><b>Date: </b></u> ${point.sensorData[0]["date_time"]}  </p>`
+                            )
+                    )
+                    .addTo(map);
+            });
+
+            console.log("Done.");
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+    map.on('load', () => {
+        map.addSource('maine', {
+            'type': 'geojson',
+            'data': {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Polygon',
+                    'coordinates': [
+                        [
+                            [0, 0]
+                        ]
+                    ]
+                }
+            }
+        });
+
+        map.addLayer({
+            'id': 'maine',
+            'type': 'fill',
+            'source': 'maine',
+            'layout': {},
+            'paint': {
+                'fill-color': '#FF0000',
+                'fill-opacity': 0.5
+            }
+        });
+
+        map.addLayer({
+            'id': 'outline',
+            'type': 'line',
+            'source': 'maine',
+            'layout': {},
+            'paint': {
+                'line-color': '#1B3D0F',
+                'line-width': 3
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+
+
