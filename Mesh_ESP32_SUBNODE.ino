@@ -8,9 +8,7 @@
 
 // Analog pin where MQ-135 sensor is connected
 const int mq135Pin = 35;
-const int bmePin = 32;
-// Number for this node
-int nodeNumber = 5;
+int nodeNumber = 10;
 
 // String to send to other nodes with sensor readings
 String readings;
@@ -34,6 +32,10 @@ String getReadings() {
   jsonReadings["flame"] = FlameValue;
   int mq135Value = analogRead(mq135Pin);
   jsonReadings["gas"] = mq135Value;  
+  int tempValue = analogRead(32);
+  jsonReadings["temp"] = tempValue;
+  int humidValue = analogRead(33);
+  jsonReadings["humid"] = humidValue;
 
   readings = JSON.stringify(jsonReadings);
   return readings;
@@ -54,6 +56,10 @@ void receivedCallback(uint32_t from, String &msg) {
   Serial.println(FlameValue_1);
   int mq135Value = myObject["gas"];  
   Serial.println(mq135Value);
+  int TempValue_1 = myObject["temp"];
+  Serial.println(TempValue_1);
+  int HumidValue_1 = myObject["humid"];
+  Serial.println(HumidValue_1);
 }
 
 void newConnectionCallback(uint32_t nodeId) {
@@ -85,5 +91,5 @@ void setup() {
 
 void loop() {
   // it will run the user scheduler as well
-  mesh.update();
+  mesh.update();  
 }
