@@ -17,7 +17,10 @@ int sensorValue = 0;
 // General stuff
 int gasPin = 35;
 int sensorValue1 = 0;
-
+int tempPin = 32;
+int sensorValue2 = 0;
+int humidPin = 33;
+int sensorValue3 = 0;
 // User stub
 void sendMessage();  // Prototype so PlatformIO doesn't complain
 
@@ -27,12 +30,16 @@ Task taskSendMessage(TASK_SECOND * 5, TASK_FOREVER, &sendMessage);
 void sendMessage() {
   sensorValue = analogRead(flamePin);
   sensorValue1 = analogRead(gasPin);
+  sensorValue2 = analogRead(tempPin);
+  sensorValue3 = analogRead(humidPin);
 
   // Create a JSON document with the node number and MQ-135 value
   DynamicJsonDocument jsonReadings(200);  // 200 is the capacity of the JSON document
   jsonReadings["node"] = nodeNumber;
   jsonReadings["flame"] = sensorValue;
   jsonReadings["gas"] = sensorValue1;
+  jsonReadings["temp"] = sensorValue2;
+  jsonReadings["humid"] = sensorValue3;
 
   // Serialize the JSON document to a string
   String msg;
@@ -52,13 +59,15 @@ void receivedCallback(uint32_t from, String& msg) {
 
   int node = myObject["node"];
   int gasValue = myObject["gas"];
-  int flameValue = myObject["flame"];  // Fix: Added missing semicolon
+  int flameValue = myObject["flame"];  
+  int tempValue = myObject["temp"];
+  int humidValue = myObject["humid"];
 
   //sensor stuff
   float coConcentration = map(gasValue, 0,  500, 0, 1000); 
   float co2Concentration = map(gasValue, 0, 1023, 0, 2000); 
 
-  String toSend = (String)node + "," + (String)coConcentration + "," + (String)co2Concentration + "," + (String)flameValue + "\n" ; //sending the message to the slave
+  String toSend = (String)node + "," + (String)coConcentration + "," + (String)co2Concentration + "," + (String)flameValue + "," + (String)tempValue + "," + (String)humidValue + "\n" ; //sending the message to the slave
 
   Serial2.write(toSend.c_str());
   Serial.println(toSend); //printing the values to the serial monitor
@@ -70,6 +79,10 @@ void receivedCallback(uint32_t from, String& msg) {
   Serial.println(flameValue);
   Serial.print("Gas reading: ");
   Serial.println(gasValue);
+  Serial.print("Temp reading: ");
+  Serial.println(tempValue);
+  Serial.print("Humid reading: ");
+  Serial.println(humidValue);
 }
 
 void newConnectionCallback(uint32_t nodeId) {
@@ -105,5 +118,5 @@ void setup() {
 
 void loop() {
   mesh.update(); //updating the mesh network for the sensor values
-  delay(1000);
+ 
 }
