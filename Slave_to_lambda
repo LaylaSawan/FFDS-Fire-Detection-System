@@ -11,8 +11,7 @@ String incoming; // create a String variable "incoming"
 const char* ssid = "SixStars"; // set the SSID of the WiFi network
 const char* password = "Ilovewael1968"; // set the password of the WiFi network
 
-String serverName = "https://y40cmoim0k.execute-api.us-east-2.amazonaws.com/DepB"; // set the server name to the API deployment link
-const char* API_KEY = "SgkoVXXcHQaK9jhBcQiHy99xOgbCheQm30wPRU8i"; // set the API key to connect to the API
+String serverName = "https://y40cmoim0k.execute-api.us-east-2.amazonaws.com/DepA"; // set the server name to the API deployment link
 
 unsigned long lastTime = 0; 
 unsigned long timerDelay = 10000;
@@ -38,7 +37,7 @@ void setup() {
  Serial.print("Connected to WiFi network with IP Address: "); // print the message "Connected to WiFi network with IP Address: "
  Serial.println(WiFi.localIP()); // print the local IP address of the device
 
- Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading."); // print the message "Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading."
+ Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading."); 
 }
 
 void loop() {
@@ -52,7 +51,6 @@ void loop() {
  
  HTTPClient http; // create an HTTPClient object "http"
  http.begin(serverPath.c_str()); // initialize the HTTPClient object with the server path
- http.addHeader("x-api-key", API_KEY); // add the API key to the HTTP header
  
  int httpResponseCode = http.GET(); // send a GET request and store the HTTP response code in the "httpResponseCode" variable
  
@@ -73,5 +71,4 @@ void loop() {
  }
  } 
 
- delay(500); // wait for 500 milliseconds
 }
